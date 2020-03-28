@@ -1,0 +1,41 @@
+{
+    "_comment1": "Comment here",
+    "builders": [{
+      "type": "amazon-ebs",
+  
+      "region": "{{user `region`}}",
+  
+      "instance_type": "t2.micro",
+      "ssh_username": "ec2-user",
+  
+      "ssh_keypair_name": "packer",
+      "ssh_private_key_file": "/home/centos/.ssh/id_rsa", 
+      "ami_name": "r1soft-server {{timestamp}}",
+  
+      "source_ami_filter": {
+        "owners": ["137112412989"], 
+        "most_recent": true
+      }
+    }],
+  
+    "_comment2": "epel-release  for centos",
+    "provisioners": [
+      {
+      "type": "file",
+      "source": "./r1soft.repo",
+      "destination": "/tmp/"
+      },
+      {
+      "type": "shell",
+      "inline":[
+        "sudo mv /tmp/r1soft.repo /etc/yum.repos.d/",
+        "sudo yum update -y",
+        "sudo yum install epel-release -y", 
+        "sudo yum install r1soft-cdp-enterprise-server",
+        "sudo r1soft-setup --user admin --pass strong --http-port 80",
+        "sudo systemctl restart cdp-server",
+        "sudo systemctl enable cdp-server"
+      ]
+      } 
+    ]
+  }
